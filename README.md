@@ -19,6 +19,11 @@ screenshots
 
 
 
+
+
+
+
+
 <img width="1918" height="852" alt="image" src="https://github.com/user-attachments/assets/5279de6e-5a8b-4294-a54e-c529a4d0226a" />
 
 
