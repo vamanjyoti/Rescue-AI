@@ -1,0 +1,56 @@
+DisNo.,Disaster Group,Disaster Subgroup,Disaster Type,Disaster Subtype,Event Name,Location,Start Year,Start Month,End Year,End Month,Total Deaths,No. Injured,No. Affected,Total Affected,Total Damage ('000 US$)
+1900-9001-IND,Natural,Climatological,Drought,Drought,,Bengal,1900,,,1900,,1250000,,1250000,
+1905-0003-IND,Natural,Geophysical,Earthquake,Ground movement,,Kangra,1905,4,1905,4,20000,,,20000,25000
+1916-0004-IND,Natural,Meteorological,Storm,Tropical cyclone,,Cuddalore/Pondicherry,1916,11,1916,11,300,,,300,
+1924-0003-IND,Natural,Meteorological,Storm,Tropical cyclone,,Punjab province,1924,9,1924,9,1242,,1000000,1000000,
+1942-0009-IND,Natural,Meteorological,Storm,Tropical cyclone,,Orissa/West Bengal,1942,10,1942,10,40000,,,40000,
+1950-0008-IND,Natural,Geophysical,Earthquake,Ground movement,,Assam province,1950,8,1950,8,1500,,,1500,20000
+1963-0019-IND,Natural,Meteorological,Storm,Storm (General),,Orissa/Uttar Pradesh/Punjab,1963,9,1963,9,200,,5000000,5000000,
+1967-0055-IND,Natural,Hydrological,Flood,Flood (General),,North/Central India,1967,9,1967,9,300,,1000000,1000000,
+1967-0077-IND,Natural,Geophysical,Earthquake,Ground movement,,Maharashtra Koynana,1967,12,1967,12,177,2272,50000,52272,400
+1968-0055-IND,Natural,Hydrological,Flood,Flash flood,,Rajasthan/Gujarat/NE India,1968,7,1968,7,4892,,7500000,7500000,94200
+1971-0058-IND,Natural,Meteorological,Storm,Tropical cyclone,,East coast Orissa,1971,10,1971,10,9658,,4900000,6900000,30000
+1977-0133-IND,Natural,Meteorological,Storm,Tropical cyclone,,Tamil Nadu/Andhra Pradesh/Kerala,1977,11,1977,11,14204,,9037400,14469800,498535
+1978-0087-IND,Natural,Hydrological,Flood,Flood (General),,North/Northeast India,1978,7,1978,7,3800,,32000000,32000000,165000
+1979-0051-IND,Natural,Meteorological,Storm,Tropical cyclone,,Andhra Pradesh,1979,5,1979,5,594,,1605772,1605772,12800
+1982-0087-IND,Natural,Hydrological,Flood,Flood (General),,Northeast India,1982,8,1982,8,932,,33500000,33500000,700000
+1987-0137-IND,Natural,Hydrological,Flood,Riverine flood,,Assam/Bihar/West Bengal,1987,8,1987,8,1200,,18000000,18000000,545000
+1988-0382-IND,Natural,Geophysical,Earthquake,Ground movement,,Bihar State,1988,8,1988,8,382,3766,20000000,20003766,71500
+1990-0019-IND,Natural,Meteorological,Storm,Tropical cyclone,,Andhra Pradesh,1990,5,1990,5,957,,2600000,2600000,580000
+1993-0074-IND,Natural,Geophysical,Earthquake,Ground movement,,Latur/Osmanabad Maharashtra,1993,9,1993,9,9748,30000,,30000,280000
+1993-0042-IND,Natural,Hydrological,Flood,Flood (General),,Punjab/Haryana/Himachal Pradesh,1993,7,1993,7,827,,128000000,128000000,7000000
+1994-0068-IND,Natural,Hydrological,Flood,Flood (General),,Assam/Arunachal Pradesh/J&K,1994,5,1994,10,2001,50,12000000,12060050,175000
+1995-0228-IND,Natural,Hydrological,Flood,Riverine flood,,Bihar/Haryana/Punjab/Rajasthan,1995,9,1995,9,1479,,32704000,32704000,258000
+1996-0256-IND,Natural,Meteorological,Storm,Tropical cyclone,,East/West Godavari Andhra Pradesh,1996,11,1996,11,708,,7000000,7000000,1500300
+1998-0183-IND,Natural,Meteorological,Storm,Tropical cyclone,,Gujarat state,1998,6,1998,6,2871,893,4600000,4600893,469000
+1998-0217-IND,Natural,Meteorological,Extreme temperature,Heat wave,,Orissa/Andhra Pradesh/Rajasthan,1998,5,1998,5,2541,,,2541,
+1998-0392-IND,Natural,Hydrological,Flood,Flood (General),,Assam/Arunachal/Bihar/Kerala,1998,8,1998,8,1811,,29227200,29227200,
+1999-0425-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone 05B,Orissa/Andhra Pradesh/West Bengal,1999,10,1999,10,9843,3312,12625000,12628312,2500000
+2001-0033-IND,Natural,Geophysical,Earthquake,Ground movement,,Gujarat province,2001,1,2001,1,20005,166812,4365000,6321812,2623000
+2001-0332-IND,Natural,Hydrological,Flood,Riverine flood,,Orissa/Chhattisgarh,2001,7,2001,7,100,,9670000,9670000,90000
+2002-0374-IND,Natural,Hydrological,Flood,Riverine flood,,Assam/Bihar/Andhra Pradesh,2002,6,2002,8,549,,42000000,42000000,30772
+2004-0659-IND,Natural,Geophysical,Earthquake,Tsunami,,Tamil Nadu/Andhra Pradesh/Kerala,2004,12,2004,12,16389,6913,647599,654512,1022800
+2005-0409-IND,Natural,Hydrological,Flood,Riverine flood,,Gujarat/Maharashtra/Goa,2005,7,2005,8,1200,55,20000000,20000055,3330000
+2007-0320-IND,Natural,Hydrological,Flood,Riverine flood,,Bihar/Uttar Pradesh/Assam/Orissa,2007,7,2007,9,1103,,18700000,18700000,
+2008-0486-IND,Natural,Hydrological,Flood,Riverine flood,Kosi Flood,Bihar province,2008,8,2008,9,47,,2600000,2600000,20000
+2009-0429-IND,Natural,Hydrological,Flood,Riverine flood,,Karnataka/Andhra Pradesh/Maharashtra,2009,9,2009,10,355,,4100000,4100000,2150000
+2010-0373-IND,Natural,Hydrological,Flood,Flash flood,,Leh Jammu and Kashmir,2010,8,2010,8,196,225,12500,12725,
+2013-0192-IND,Natural,Hydrological,Flood,Riverine flood,,Uttarakhand/Himachal Pradesh,2013,6,2013,6,6054,4473,500000,504473,1100000
+2013-0401-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Phailin,Orissa/Andhra Pradesh,2013,10,2013,10,47,,13230000,13230000,633471
+2014-0343-IND,Natural,Hydrological,Flood,Riverine flood,,Jammu and Kashmir,2014,9,2014,9,298,,275000,275000,16000000
+2014-0392-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Hudhud,Andhra Pradesh/Orissa,2014,10,2014,10,53,,920000,920000,7000000
+2015-0189-IND,Natural,Meteorological,Extreme temperature,Heat wave,,Delhi/Andhra Pradesh/Orissa,2015,5,2015,5,2248,,,2248,
+2015-0504-IND,Natural,Hydrological,Flood,Flood (General),,Tamil Nadu/Andhra Pradesh,2015,11,2015,12,325,1000,1800000,1801000,2200000
+2016-0271-IND,Natural,Hydrological,Flood,Flood (General),,Bihar/Uttar Pradesh,2016,7,2016,9,254,,1600000,1600000,350000
+2017-0342-IND,Natural,Hydrological,Flood,Flood (General),,Bihar/Uttar Pradesh/West Bengal,2017,8,2017,8,514,,17200000,17200000,1567000
+2018-0295-IND,Natural,Hydrological,Flood,Flash flood,,Kerala/West Bengal/Odisha,2018,8,2018,8,504,,23000000,23220000,2852480
+2019-0164-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Fani,Odisha province,2019,5,2019,5,50,,20000000,20000000,1810000
+2019-0331-IND,Natural,Hydrological,Flood,Flood (General),,Bihar/Assam/Maharashtra/Kerala,2019,7,2019,9,1900,,3000000,3000000,10000000
+2020-0211-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Amphan,Odisha/West Bengal,2020,5,2020,5,90,,18000000,18000000,13500000
+2020-0304-IND,Natural,Hydrological,Flood,Flood (General),,Assam/Bihar/Gujarat/Kerala,2020,6,2020,8,1922,,1300000,1300000,7500000
+2021-0252-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Tauktae,Kerala/Karnataka/Gujarat/Maharashtra,2021,5,2021,5,198,153,700000,700153,1400000
+2021-0295-IND,Natural,Meteorological,Storm,Tropical cyclone,Cyclone Yaas,West Bengal/Odisha,2021,5,2021,5,19,,1625000,1625000,3000000
+2021-0435-IND,Natural,Hydrological,Flood,Flood (General),,Maharashtra/Karnataka/Goa,2021,6,2021,9,1282,,375000,375000,3100000
+2022-0293-IND,Natural,Hydrological,Flood,Flood (General),,Assam/Bihar/Himachal Pradesh,2022,5,2022,10,2035,1260,1300000,1301260,4200000
+2023-0428-IND,Natural,Hydrological,Flood,Flood (General),,Himachal Pradesh/Uttarakhand/Delhi,2023,6,2023,9,1529,,10250000,10250000,
+2023-0622-IND,Natural,Climatological,Glacial lake outburst flood,Glacial lake outburst flood,,Sikkim state,2023,10,2023,10,178,,88400,88400,
