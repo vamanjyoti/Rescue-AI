@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RescueAI – Disaster Response</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#060d1a;--panel:#0d1b2e;--card:#112240;--border:#1e3a5f;--orange:#f97316;--blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;--high:#ef4444;--med:#f59e0b;--low:#22c55e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
+
+/* Navbar */
+.nav{height:56px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1rem;z-index:10;}
+.nav-logo{font-size:1.5rem;}
+.nav-brand .nav-title{font-size:1.1rem;font-weight:700;color:var(--orange);}
+.nav-brand .nav-sub{font-size:.72rem;color:var(--muted);}
+.nav-pills{margin-left:auto;display:flex;gap:.4rem;align-items:center;}
+.pill{background:#0a1628;border:1px solid var(--border);color:#93c5fd;font-size:.67rem;padding:.22rem .65rem;border-radius:20px;position:relative;cursor:default;transition:border-color .2s;}
+.pill:hover{border-color:var(--orange);}
+.pill .tip{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0d1b2e;border:1px solid var(--border);color:#cbd5e1;font-size:.67rem;padding:.45rem .75rem;border-radius:7px;white-space:nowrap;z-index:200;line-height:1.6;box-shadow:0 6px 20px rgba(0,0,0,.6);}
+.pill:hover .tip{display:block;}
+
+/* Status dots */
+.status-row{display:flex;gap:.75rem;align-items:center;margin-left:.75rem;padding-left:.75rem;border-left:1px solid var(--border);}
+.dot-item{display:flex;align-items:center;gap:.3rem;font-size:.67rem;color:var(--muted);}
+.dot{width:7px;height:7px;border-radius:50%;background:#334155;}
+.dot.on{background:var(--low);box-shadow:0 0 6px var(--low);}
+.dot.off{background:var(--high);}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:272px 1fr;height:calc(100vh - 56px);overflow:hidden;}
+
+/* Sidebar */
+.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:.85rem;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);}
+.s-title{font-size:.68rem;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;}
+.form-group{display:flex;flex-direction:column;gap:.28rem;}
+.form-group label{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.form-group select,.form-group input[type=text]{background:#060d1a;border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.84rem;padding:.48rem .72rem;outline:none;transition:border-color .2s;}
+.form-group select:focus,.form-group input[type=text]:focus{border-color:var(--orange);}
+.sev-row{display:flex;align-items:center;gap:.6rem;}
+.sev-row input[type=range]{flex:1;accent-color:var(--orange);}
+.sev-val{background:var(--orange);color:#fff;font-size:.78rem;font-weight:700;padding:.15rem .5rem;border-radius:12px;min-width:26px;text-align:center;}
+.btn-analyze{width:100%;padding:.62rem;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(249,115,22,.3);transition:opacity .2s;}
+.btn-analyze:hover{opacity:.88;}
+.btn-analyze:disabled{background:#334155;box-shadow:none;cursor:not-allowed;}
+.err{color:#f87171;font-size:.73rem;}
+
+/* Stats strip in sidebar */
+.stats-strip{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.stat-box{background:#060d1a;border:1px solid var(--border);border-radius:8px;padding:.6rem .7rem;text-align:center;}
+.stat-num{font-size:1.1rem;font-weight:700;color:var(--orange);}
+.stat-lbl{font-size:.62rem;color:var(--muted);margin-top:.1rem;}
+
+.ds-box{background:#060d1a;border:1px solid var(--border);border-radius:8px;padding:.7rem;font-size:.7rem;color:var(--muted);}
+.ds-box .ds-t{color:#94a3b8;font-weight:600;margin-bottom:.3rem;}
+.ds-formula{color:var(--orange);margin-top:.3rem;font-size:.66rem;line-height:1.5;}
+
+/* Content */
+.content{display:flex;flex-direction:column;overflow:hidden;}
+.tabs{display:flex;gap:.4rem;padding:.6rem 1rem;border-bottom:1px solid var(--border);background:var(--panel);}
+.tab{padding:.32rem .85rem;border-radius:6px;font-size:.76rem;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all .2s;}
+.tab.active{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:600;}
+
+.pane{flex:1;overflow-y:auto;padding:.65rem 1rem;display:flex;flex-direction:column;gap:.6rem;}
+.pane::-webkit-scrollbar{width:4px;}
+.pane::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.72rem .95rem;}
+.card-lbl{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.48rem;}
+
+/* Grids */
+.top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;align-items:stretch;}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:stretch;}
+
+/* Priority */
+.p-badge{display:inline-block;padding:.28rem .9rem;border-radius:20px;font-weight:700;font-size:.92rem;}
+.HIGH{background:var(--high);color:#fff;}
+.MEDIUM{background:var(--med);color:#fff;}
+.LOW{background:var(--low);color:#fff;}
+.p-score{font-size:.71rem;color:var(--muted);margin-top:.28rem;}
+
+/* Resources */
+.res-list{list-style:none;display:flex;flex-direction:column;gap:.22rem;}
+.res-list li{display:flex;justify-content:space-between;font-size:.79rem;}
+.res-list li span:last-child{color:var(--orange);font-weight:600;}
+
+/* Alert */
+.alert-box{background:#0a1628;border-left:3px solid var(--orange);padding:.52rem .78rem;border-radius:0 7px 7px 0;font-size:.79rem;color:#fcd34d;line-height:1.5;}
+.evac{display:inline-block;margin-top:.45rem;background:var(--high);color:#fff;font-size:.66rem;padding:.18rem .5rem;border-radius:4px;font-weight:700;}
+
+/* Planning */
+.plan-text{font-size:.81rem;line-height:1.6;color:#cbd5e1;}
+.brief{margin-top:.48rem;background:#0a1628;border-left:3px solid var(--blue);padding:.48rem .78rem;border-radius:0 6px 6px 0;font-size:.77rem;color:#93c5fd;line-height:1.5;}
+
+/* Map */
+#mapContainer{width:100%;height:240px;border-radius:8px;overflow:hidden;}
+.map-ph{background:#060d1a;border-radius:8px;height:240px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem;border:1px dashed var(--border);}
+
+/* History table */
+.hist-table{width:100%;border-collapse:collapse;font-size:.76rem;}
+.hist-table th{background:#060d1a;color:var(--muted);font-size:.63rem;text-transform:uppercase;letter-spacing:.05em;padding:.48rem .65rem;text-align:left;border-bottom:1px solid var(--border);}
+.hist-table td{padding:.45rem .65rem;border-bottom:1px solid #0d1b2e;color:#cbd5e1;}
+.hist-table tr:hover td{background:#0d1b2e;}
+
+/* Empty / Loading */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:.75rem;}
+.empty-icon{font-size:3rem;opacity:.35;}
+.loading{display:flex;align-items:center;justify-content:center;height:100%;color:var(--orange);gap:.75rem;font-size:.86rem;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Analytics */
+.city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:.6rem;margin-top:.6rem;}
+.city-card{background:#060d1a;border:1px solid var(--border);border-radius:8px;padding:.8rem;}
+.city-name{font-size:.83rem;font-weight:600;color:var(--orange);margin-bottom:.3rem;}
+.city-stat{font-size:.7rem;color:var(--muted);margin-bottom:.12rem;}
+.city-stat span{color:var(--text);font-weight:500;}
+.tbl-wrap{overflow-x:auto;margin-top:.6rem;}
+table{width:100%;border-collapse:collapse;font-size:.76rem;}
+th{background:#060d1a;color:var(--muted);text-transform:uppercase;font-size:.63rem;letter-spacing:.05em;padding:.5rem .65rem;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:.45rem .65rem;border-bottom:1px solid #0d1b2e;color:#cbd5e1;}
+tr:hover td{background:#0d1b2e;}
+.pb{display:inline-block;padding:.1rem .42rem;border-radius:12px;font-weight:700;font-size:.63rem;}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+canvas{max-height:200px;}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="nav">
+  <span class="nav-logo">🚨</span>
+  <div class="nav-brand">
+    <div class="nav-title">RescueAI</div>
+    <div class="nav-sub">Multi-Agent Autonomous Disaster Response System</div>
+  </div>
+  <div class="nav-pills">
+    <span class="pill">🧠 Planning Agent<span class="tip">Identifies high-priority disaster zones<br>and recommends immediate actions based on data</span></span>
+    <span class="pill">📦 Resource Agent<span class="tip">Allocates rescue teams, medical kits,<br>food packs, helicopters and ambulances</span></span>
+    <span class="pill">📡 Communication Agent<span class="tip">Generates public alerts, responder briefs<br>and issues evacuation orders</span></span>
+    <span class="pill">📊 Analytics<span class="tip">Processes 6,000 zones · Priority formula:<br>0.4×Severity + 0.3×Population + 0.2×Distance + 0.1×Weather</span></span>
+    <span class="pill">🗄️ MongoDB<span class="tip">Stores all disaster records, priority scores,<br>resource allocations and history</span></span>
+  </div>
+  <div class="status-row">
+    <div class="dot-item"><span class="dot" id="dotBackend"></span>Backend</div>
+    <div class="dot-item"><span class="dot" id="dotAnalytics"></span>Analytics</div>
+    <div class="dot-item"><span class="dot" id="dotMongo"></span>MongoDB</div>
+  </div>
+</nav>
+
+<!-- Layout -->
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="s-title">🛰️ Disaster Input</div>
+
+    <div class="form-group">
+      <label>Disaster Type</label>
+      <select id="dtype" required >
+        <option value="" disabled selected hidden style="color:#64748b">-- Select Disaster Type --</option>
+        <option value="Flood">🌊 Flood</option><option value="Fire">🔥 Fire</option><option value="Earthquake">🏔️ Earthquake</option>
+        <option value="Cyclone">🌀 Cyclone</option><option value="Landslide">⛰️ Landslide</option><option value="Tsunami">🌊 Tsunami</option>
+      </select>
+       
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Location / City</label>
+      <input type="text" id="loc" placeholder="e.g. Mumbai, Maharashtra"/>
+    </div>
+    <div class="form-group">
+      <label>Severity Level</label>
+      <div class="sev-row">
+        <input type="range" id="sev" min="1" max="10" value="5" oninput="document.getElementById('sevVal').textContent=this.value"/>
+        <span class="sev-val" id="sevVal">5</span>
+      </div>
+    </div>
+
+    <p class="err" id="errMsg" style="display:none"></p>
+    <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">🔍 Analyze Disaster</button>
+
+    <!-- Live stats -->
+    <div class="stats-strip" id="liveStats">
+      <div class="stat-box"><div class="stat-num">6,000</div><div class="stat-lbl">Total Zones</div></div>
+      <div class="stat-box"><div class="stat-num">8</div><div class="stat-lbl">Cities</div></div>
+      <div class="stat-box"><div class="stat-num" id="statHigh">—</div><div class="stat-lbl">High Priority</div></div>
+      <div class="stat-box"><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">Analyses Done</div></div>
+    </div>
+
+    <div class="ds-box">
+      <div class="ds-t">📊 Priority Formula</div>
+      <div class="ds-formula">Score = 0.4×Severity<br>+ 0.3×Population Density<br>+ 0.2×Distance<br>+ 0.1×Weather Risk</div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="tabs">
+      <button class="tab active" id="tabR" onclick="switchTab('r')">📊 Results</button>
+      <button class="tab" id="tabH" onclick="switchTab('h')">🕒 History</button>
+      <button class="tab" id="tabQ" onclick="switchTab('q')">⚛️ Quantum Route</button>
+      <button class="tab" id="tabE" onclick="switchTab('e')">📜 EM-DAT Historical</button>
+      <button class="tab" id="tabA" onclick="switchTab('a')">🗃️ Dataset Analytics</button>
+    </div>
+
+    <!-- Results pane -->
+    <div id="paneR" class="pane">
+      <div class="empty" id="emptyState">
+        <span class="empty-icon">🛰️</span>
+        <p>Enter disaster details and click Analyze to run AI agents.</p>
+        <p style="font-size:.75rem;color:#334155">Backend · Analytics · MongoDB · Google Maps</p>
+      </div>
+      <div id="loadingState" style="display:none" class="loading">
+        <div class="spinner"></div>Running 3 AI Agents — Planning · Resource · Communication...
+      </div>
+      <div id="resultsContent" style="display:none"></div>
+    </div>
+
+    <!-- History pane -->
+    <div id="paneH" style="display:none" class="pane">
+      <div class="card">
+        <div class="card-lbl">🕒 Disaster Analysis History — MongoDB</div>
+        <div id="historyContent"><div class="loading"><div class="spinner"></div>Loading history...</div></div>
+      </div>
+    </div>
+
+    <!-- Quantum pane -->
+    <div id="paneQ" style="display:none" class="pane">
+      <div class="card">
+        <div class="card-lbl">⚛️ Quantum Route Optimizer</div>
+        <p style="font-size:.8rem;color:#94a3b8;margin-bottom:.75rem"></p>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+          <button onclick="runQuantum()" style="padding:.5rem 1.2rem;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer">⚛️ Run Quantum Optimizer</button>
+          <span style="font-size:.72rem;color:#64748b;align-self:center"></span>
+        </div>
+        <div id="quantumResult"><div style="color:#64748b;font-size:.82rem">Click the button to run quantum route optimization.</div></div>
+      </div>
+    </div>
+
+    <!-- EM-DAT Historical pane -->
+    <div id="paneE" style="display:none" class="pane">
+      <div class="card">
+        <div class="card-lbl">📜 EM-DAT — Real Indian Disaster Records (1900–2024)</div>
+        <p style="font-size:.78rem;color:#64748b;margin-bottom:.75rem">Source: EM-DAT International Disaster Database, CRED — University of Louvain. Real historical disaster data from India.</p>
+        <div id="emdatContent"><div class="loading"><div class="spinner"></div>Loading EM-DAT data...</div></div>
+      </div>
+    </div>
+
+    <!-- Analytics pane -->
+    <div id="paneA" style="display:none" class="pane">
+      <div id="analyticsContent"><div class="loading"><div class="spinner"></div>Loading analytics...</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='http://localhost:5000/api', ANALYTICS='http://localhost:8000'
+const GMAPS_KEY='AIzaSyCS56CwmjvsBi47DN17MgFnQVZNQ6PgiOk'
+let analyticsLoaded=false, currentLocation='', historyLoaded=false, emdatLoaded=false
+let analysisCount=0, highCount=0
+
+const CITY_COORDS={mumbai:{lat:19.076,lng:72.877},delhi:{lat:28.704,lng:77.102},bangalore:{lat:12.972,lng:77.594},chennai:{lat:13.083,lng:80.270},kolkata:{lat:22.573,lng:88.364},hyderabad:{lat:17.385,lng:78.487},pune:{lat:18.520,lng:73.856},ahmedabad:{lat:23.023,lng:72.572}}
+const darkStyle=[{elementType:'geometry',stylers:[{color:'#060d1a'}]},{elementType:'labels.text.fill',stylers:[{color:'#64748b'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#1e3a5f'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2e'}]},{featureType:'poi',stylers:[{visibility:'off'}]}]
+
+// ── Status checks ─────────────────────────────────────────────────────────────
+async function checkStatus(){
+  // Backend
+  try{ await fetch(`${API.replace('/api','')}/health`); setDot('dotBackend',true) }catch{ setDot('dotBackend',false) }
+  // Analytics
+  try{ await fetch(`${ANALYTICS}/health`); setDot('dotAnalytics',true) }catch{ setDot('dotAnalytics',false) }
+  // MongoDB (inferred from backend health)
+  try{
+    const r=await fetch(`${API.replace('/api','')}/health`)
+    const d=await r.json()
+    setDot('dotMongo', d.status==='ok')
+  }catch{ setDot('dotMongo',false) }
+}
+function setDot(id,on){ const d=document.getElementById(id); if(d){ d.className='dot '+(on?'on':'off') } }
+checkStatus()
+setInterval(checkStatus, 10000)
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(t){
+  ['r','h','q','e','a'].forEach(x=>{
+    document.getElementById('tab'+x.toUpperCase()).classList.toggle('active',t===x)
+    document.getElementById('pane'+x.toUpperCase()).style.display=t===x?'flex':'none'
+  })
+  if(t==='a'&&!analyticsLoaded) loadAnalytics()
+  if(t==='h'&&!historyLoaded) loadHistory()
+  if(t==='e'&&!emdatLoaded) loadEmdat()
+}
+
+// ── Analyze ───────────────────────────────────────────────────────────────────
+async function analyze(){
+  const err=document.getElementById('errMsg')
+  const dtype=document.getElementById('dtype').value
+  if(!dtype){err.textContent='Please select a disaster type.';err.style.display='block';return}
+  const loc=document.getElementById('loc').value.trim()
+  const sev=document.getElementById('sev').value
+  if(!loc){err.textContent='Please enter a location.';err.style.display='block';return}
+  err.style.display='none'
+  document.getElementById('emptyState').style.display='none'
+  document.getElementById('loadingState').style.display='flex'
+  document.getElementById('resultsContent').style.display='none'
+  document.getElementById('analyzeBtn').disabled=true
+  document.getElementById('analyzeBtn').textContent='Running AI Agents...'
+  try{
+    const res=await fetch(`${API}/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({disasterType:dtype,location:loc,severity:Number(sev)})})
+    const data=await res.json()
+    renderResults(data,{disasterType:dtype,location:loc,severity:sev})
+    analysisCount++
+    if(data.priority?.level==='HIGH') highCount++
+    document.getElementById('statTotal').textContent=analysisCount
+    document.getElementById('statHigh').textContent=highCount
+    historyLoaded=false // reset so history reloads next time
+  }catch(e){
+    document.getElementById('loadingState').style.display='none'
+    document.getElementById('emptyState').style.display='flex'
+    err.textContent='Backend error. Make sure the server is running on port 5000.'
+    err.style.display='block'
+  }finally{
+    document.getElementById('analyzeBtn').disabled=false
+    document.getElementById('analyzeBtn').textContent='🔍 Analyze Disaster'
+  }
+}
+
+// ── Render Results ────────────────────────────────────────────────────────────
+function renderResults(data,form){
+  document.getElementById('loadingState').style.display='none'
+  const{priority,resources,explanation}=data
+  const r=resources||{},e=explanation||{},lv=priority?.level||'UNKNOWN'
+  const extra=[r.boats?`<li><span>🚤 Boats</span><span>${r.boats}</span></li>`:'',r.fireEngines?`<li><span>🔥 Fire Engines</span><span>${r.fireEngines}</span></li>`:'',r.waterTankers>0?`<li><span>💧 Water Tankers</span><span>${r.waterTankers}</span></li>`:''].join('')
+
+  document.getElementById('resultsContent').innerHTML=`
+    <div class="top-grid">
+      <div class="card">
+        <div class="card-lbl">🎯 Priority Level</div>
+        <span class="p-badge ${lv}">${lv}</span>
+        <div class="p-score">Score: ${priority?.score??'—'} / 10</div>
+        <div class="p-score">${form.disasterType} · Severity ${form.severity}/10</div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">📦 Resource Agent</div>
+        <ul class="res-list">
+          <li><span>🚒 Rescue Teams</span><span>${r.teams??'—'}</span></li>
+          <li><span>🏥 Medical Kits</span><span>${r.medicalKits??'—'}</span></li>
+          <li><span>🍱 Food Packs</span><span>${r.foodPacks??'—'}</span></li>
+          <li><span>🚁 Helicopters</span><span>${r.helicopters??'—'}</span></li>
+          <li><span>🚑 Ambulances</span><span>${r.ambulances??'—'}</span></li>
+          ${extra}
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-lbl">📡 Communication Agent</div>
+        <div class="alert-box">${e.alertMessage||`⚠️ ${form.disasterType} alert for ${form.location}`}</div>
+        ${e.evacuationOrder?'<span class="evac">🚨 EVACUATION ORDERED</span>':''}
+      </div>
+    </div>
+    <div class="card" style="margin-top:.3rem">
+      <div class="card-lbl">🧠 Planning Agent Analysis</div>
+      <p class="plan-text">${e.text||'No analysis available.'}</p>
+      ${e.responderBrief?`<div class="brief"><strong>Responder Brief:</strong> ${e.responderBrief}</div>`:''}
+    </div>
+    <div class="bottom-row" style="margin-top:.3rem">
+      <div class="card" style="min-height:180px">
+        <div class="card-lbl">💡 Resource Reasoning</div>
+        <p style="font-size:.82rem;color:#94a3b8;line-height:1.6">${r.reasoning||'Resource allocation based on severity and priority level.'}</p>
+      </div>
+      <div class="card">
+        <div class="card-lbl">🗺️ Route Map — ${form.location}</div>
+        <div id="mapContainer"><div class="map-ph">📍 Loading map...</div></div>
+      </div>
+    </div>`
+  document.getElementById('resultsContent').style.display='block'
+  currentLocation=form.location
+  loadMap(form.location)
+}
+
+// ── Map ───────────────────────────────────────────────────────────────────────
+function loadMap(loc){
+  if(!window.google){const s=document.createElement('script');s.src=`https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&callback=initMap`;s.async=true;document.head.appendChild(s)}else{initMap()}
+}
+function initMap(){
+  const el=document.getElementById('mapContainer');if(!el)return;el.innerHTML=''
+  const k=currentLocation.toLowerCase().split(',')[0].trim()
+  const center=CITY_COORDS[k]||{lat:20.593,lng:78.962}
+  const map=new google.maps.Map(el,{center,zoom:12,styles:darkStyle})
+  new google.maps.Marker({position:center,map,title:currentLocation,animation:google.maps.Animation.DROP})
+  new google.maps.Geocoder().geocode({address:currentLocation+', India'},(res,st)=>{
+    if(st==='OK'&&res[0]){const loc=res[0].geometry.location;map.setCenter(loc);new google.maps.Marker({position:loc,map,animation:google.maps.Animation.DROP})}
+  })
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+async function loadHistory(){
+  historyLoaded=true
+  try{
+    const res=await fetch(`${API}/history`)
+    const data=await res.json()
+    if(!data.length){document.getElementById('historyContent').innerHTML='<p style="color:#64748b;font-size:.82rem;padding:.5rem 0">No disaster records yet. Run an analysis first.</p>';return}
+    const rows=data.map(d=>`<tr>
+      <td>${new Date(d.createdAt).toLocaleString()}</td>
+      <td>${d.disasterType}</td>
+      <td>${d.location}</td>
+      <td>${d.severity}/10</td>
+      <td><span class="p-badge pb ${d.priorityLevel||'MEDIUM'}">${d.priorityLevel||'—'}</span></td>
+      <td style="color:var(--orange)">${d.priorityScore??'—'}</td>
+    </tr>`).join('')
+    document.getElementById('historyContent').innerHTML=`
+      <div style="overflow-x:auto">
+        <table class="hist-table">
+          <thead><tr><th>Time</th><th>Type</th><th>Location</th><th>Severity</th><th>Priority</th><th>Score</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`
+  }catch{
+    document.getElementById('historyContent').innerHTML='<p style="color:#64748b;font-size:.82rem">History unavailable. Backend may not have /api/history endpoint.</p>'
+  }
+}
+
+// ── Quantum Route ─────────────────────────────────────────────────────────────
+async function runQuantum(){
+  const locInput = document.getElementById('loc').value.trim()
+  const city = locInput ? locInput.split(',')[0].trim() : 'Hyderabad'
+  const validCities = ['Hyderabad','Mumbai','Delhi','Bangalore','Chennai','Kolkata','Pune','Ahmedabad']
+  const matchedCity = validCities.find(c => city.toLowerCase() === c.toLowerCase()) || 'Hyderabad'
+  const el=document.getElementById('quantumResult')
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Running quantum circuit on simulator for '+matchedCity+'...</div>'
+  try{
+    const res=await fetch(`${ANALYTICS}/quantum-route`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({city:matchedCity})})
+    const d=await res.json()
+    const steps=d.steps.map((s,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${s.from}</td>
+        <td>→</td>
+        <td>${s.to}</td>
+        <td style="color:var(--orange)">${s.distance_km} km</td>
+      </tr>`).join('')
+    el.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+        <div style="background:#060d1a;border:1px solid #7c3aed;border-radius:8px;padding:.75rem">
+          <div style="font-size:.65rem;color:#a78bfa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">⚛️ Method</div>
+          <div style="font-size:.82rem;color:#e2e8f0">${d.method}</div>
+        </div>
+        <div style="background:#060d1a;border:1px solid #7c3aed;border-radius:8px;padding:.75rem">
+          <div style="font-size:.65rem;color:#a78bfa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">📏 Total Distance</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#f97316">${d.total_distance_km} km</div>
+        </div>
+      </div>
+      <div style="background:#060d1a;border:1px solid #1e3a5f;border-radius:8px;padding:.75rem;margin-bottom:.75rem">
+        <div style="font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">🗺️ Optimal Rescue Route</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center">
+          ${d.optimal_route.map((z,i)=>`<span style="background:#112240;border:1px solid #1e3a5f;color:#e2e8f0;padding:.2rem .6rem;border-radius:6px;font-size:.78rem">${i===0?'🏠':i===d.optimal_route.length-1?'🏠':'📍'} ${z}</span>${i<d.optimal_route.length-1?'<span style="color:#7c3aed">→</span>':''}`).join('')}
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+          <thead><tr>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Step</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">From</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;border-bottom:1px solid #1e3a5f"></th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">To</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Distance</th>
+          </tr></thead>
+          <tbody>${steps}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:.75rem;background:#0a0a1a;border-left:3px solid #7c3aed;padding:.6rem .9rem;border-radius:0 6px 6px 0;font-size:.78rem;color:#a78bfa">
+        <strong>Quantum Advantage:</strong> ${d.advantage}
+      </div>`
+  }catch(e){
+    el.innerHTML=`<div style="color:#f87171;font-size:.82rem">Quantum service error. Make sure analytics is running.<br>Install Qiskit: <code style="color:#f97316">pip install qiskit qiskit-aer</code></div>`
+  }
+}
+// ── EM-DAT Historical ─────────────────────────────────────────────────────────
+async function loadEmdat(){
+  emdatLoaded=true
+  try{
+    const res=await fetch(`${ANALYTICS}/historical`)
+    const data=await res.json()
+    if(data.error){document.getElementById('emdatContent').innerHTML=`<p style="color:#f87171;font-size:.82rem">${data.error}</p>`;return}
+    const rows=data.map(d=>`<tr>
+      <td style="color:#f97316;font-weight:600">${d.year}</td>
+      <td>${d.type}</td>
+      <td style="color:#94a3b8">${d.subtype||'—'}</td>
+      <td>${d.event||'—'}</td>
+      <td>${d.location||'—'}</td>
+      <td style="color:#f87171">${Number(d.deaths||0).toLocaleString()}</td>
+      <td style="color:#fcd34d">${Number(d.affected||0).toLocaleString()}</td>
+      <td style="color:#93c5fd">${d.damage&&d.damage!='0'?'$'+Number(d.damage).toLocaleString()+'K':'—'}</td>
+    </tr>`).join('')
+    document.getElementById('emdatContent').innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.75rem">
+        <div style="background:#060d1a;border:1px solid #1e3a5f;border-radius:8px;padding:.75rem;text-align:center">
+          <div style="font-size:1.2rem;font-weight:700;color:#f97316">${data.length}</div>
+          <div style="font-size:.7rem;color:#64748b">Total Events</div>
+        </div>
+        <div style="background:#060d1a;border:1px solid #1e3a5f;border-radius:8px;padding:.75rem;text-align:center">
+          <div style="font-size:1.2rem;font-weight:700;color:#ef4444">${data.reduce((a,d)=>a+Number(d.deaths||0),0).toLocaleString()}</div>
+          <div style="font-size:.7rem;color:#64748b">Total Deaths</div>
+        </div>
+        <div style="background:#060d1a;border:1px solid #1e3a5f;border-radius:8px;padding:.75rem;text-align:center">
+          <div style="font-size:1.2rem;font-weight:700;color:#fcd34d">${(data.reduce((a,d)=>a+Number(d.affected||0),0)/1000000).toFixed(1)}M</div>
+          <div style="font-size:.7rem;color:#64748b">Total Affected</div>
+        </div>
+        <div style="background:#060d1a;border:1px solid #1e3a5f;border-radius:8px;padding:.75rem;text-align:center">
+          <div style="font-size:1.2rem;font-weight:700;color:#93c5fd">1900–2024</div>
+          <div style="font-size:.7rem;color:#64748b">Time Span</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.76rem">
+          <thead><tr>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Year</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Type</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Subtype</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Event</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Location</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Deaths</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Affected</th>
+            <th style="background:#060d1a;color:#64748b;padding:.5rem;text-align:left;border-bottom:1px solid #1e3a5f">Damage</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`
+  }catch{
+    document.getElementById('emdatContent').innerHTML='<p style="color:#64748b;font-size:.82rem">Make sure Python analytics service is running.</p>'
+  }
+}
+
+async function loadAnalytics(){
+  analyticsLoaded=true
+  try{
+    const[zr,cr]=await Promise.all([fetch(`${ANALYTICS}/zones`),fetch(`${ANALYTICS}/city-summary`)])
+    renderAnalytics(await zr.json(),await cr.json())
+  }catch{
+    document.getElementById('analyticsContent').innerHTML=`<div class="card"><div class="card-lbl">⚠️ Analytics Offline</div><p style="color:#64748b;font-size:.82rem">Run: <code style="color:var(--orange)">python priority_service.py</code></p></div>`
+  }
+}
+
+function renderAnalytics(zones,cities){
+  // Chart data
+  const high=cities.reduce((a,c)=>a+c.high_priority,0)
+  const total=cities.reduce((a,c)=>a+c.total_zones,0)
+  const med=Math.round(total*0.35), low=total-high-med
+
+  const cityCards=cities.map(c=>`
+    <div class="city-card">
+      <div class="city-name">${c.City}</div>
+      <div class="city-stat">Zones: <span>${c.total_zones}</span></div>
+      <div class="city-stat">Avg Score: <span>${c.avg_score}</span></div>
+      <div class="city-stat">High Priority: <span style="color:#f87171">${c.high_priority}</span></div>
+      <div class="city-stat">Teams: <span>${c.total_teams}</span></div>
+    </div>`).join('')
+
+  const rows=zones.map(z=>`<tr>
+    <td>${z.Area}</td><td>${z.City}</td>
+    <td>${z.Disaster_Severity}</td><td>${z.Population_Density}</td>
+    <td>${z.Distance_km}km</td><td>${z.Weather_Risk}</td><td>${z.Available_Teams}</td>
+    <td style="color:var(--orange);font-weight:600">${z.Priority_Score}</td>
+    <td><span class="p-badge pb ${z.Priority_Level}">${z.Priority_Level}</span></td>
+  </tr>`).join('')
+
+  document.getElementById('analyticsContent').innerHTML=`
+    <div class="chart-row">
+      <div class="card">
+        <div class="card-lbl">📊 Priority Distribution — 6,000 Zones</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-lbl">🏙️ Avg Priority Score by City</div>
+        <canvas id="chartBar"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">🏙️ City Summary</div>
+      <div class="city-grid">${cityCards}</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">📋 Top Priority Zones</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Zone</th><th>City</th><th>Severity</th><th>Population</th><th>Distance</th><th>Weather</th><th>Teams</th><th>Score</th><th>Priority</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`
+
+  // Pie chart
+  new Chart(document.getElementById('chartPie'),{
+    type:'doughnut',
+    data:{labels:['HIGH','MEDIUM','LOW'],datasets:[{data:[high,med,low],backgroundColor:['#ef4444','#f59e0b','#22c55e'],borderColor:'#112240',borderWidth:2}]},
+    options:{plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},cutout:'60%'}
+  })
+
+  // Bar chart
+  new Chart(document.getElementById('chartBar'),{
+    type:'bar',
+    data:{
+      labels:cities.map(c=>c.City),
+      datasets:[{label:'Avg Score',data:cities.map(c=>c.avg_score),backgroundColor:'#f97316',borderRadius:4}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:10}}},y:{ticks:{color:'#64748b'},grid:{color:'#1e3a5f'}}}}
+  })
+}
+</script>
+</body>
+</html>
